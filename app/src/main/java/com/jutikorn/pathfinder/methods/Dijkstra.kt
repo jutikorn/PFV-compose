@@ -9,6 +9,7 @@ import java.util.PriorityQueue
 class Dijkstra {
 
     operator fun invoke(input: Board) = flow {
+        // minheap
         val queue: PriorityQueue<Item> = PriorityQueue { a, b ->
             a.indices[2] - b.indices[2]
         }
@@ -27,11 +28,12 @@ class Dijkstra {
             val qSize = queue.size
             for (k in 0 until qSize) {
                 delay(DELAY_TIME_MILLISECONDS)
-                val item = queue.poll()
+                val item = queue.poll() ?: break
                 val points = item.indices
                 pathWays = item.pathWays
                 val i = points.getOrDefault(0)
                 val j = points.getOrDefault(1)
+                val weight = points.getOrDefault(2)
 
                 if (board.isWalkable(i, j).not()) continue
                 if (visited.hasVisited(i, j)) continue
@@ -63,7 +65,7 @@ class Dijkstra {
                     val newCol = j + dir[1]
 
                     if (board.isWalkable(newRow, newCol) && visited.hasVisited(newRow, newCol).not()) {
-                        val indices = intArrayOf(newRow, newCol, board.matrix[newRow][newCol].distance)
+                        val indices = intArrayOf(newRow, newCol, weight + board.matrix[newRow][newCol].distance)
                         queue.add(
                             Item(
                                 indices = indices,

@@ -26,7 +26,7 @@ class BFS {
             val qSize = queue.size
             for (k in 0 until qSize) {
                 delay(DELAY_TIME_MILLISECONDS)
-                val item = queue.poll()
+                val item = queue.poll() ?: break
                 val points = item.indices
                 pathWays = item.pathWays
                 val i = points.getOrDefault(0)
