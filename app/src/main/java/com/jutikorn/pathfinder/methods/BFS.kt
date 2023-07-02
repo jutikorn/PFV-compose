@@ -1,5 +1,7 @@
 package com.jutikorn.pathfinder.methods
 
+import com.jutikorn.pathfinder.Directions
+import com.jutikorn.pathfinder.ext.getOrDefault
 import com.jutikorn.pathfinder.model.Block
 import com.jutikorn.pathfinder.model.Board
 import kotlinx.coroutines.delay
@@ -9,7 +11,7 @@ import java.util.Queue
 
 class BFS {
 
-    operator fun invoke(input: Board) = flow {
+    operator fun invoke(input: Board, directions: Directions) = flow {
         val queue: Queue<Item> = LinkedList()
         val visited: HashSet<String> = HashSet()
 
@@ -58,7 +60,7 @@ class BFS {
                     state = Block.State.VISITED,
                 )
 
-                for (dir in DIRECTIONS) {
+                for (dir in directions.dirs) {
                     val newRow = i + dir[0]
                     val newCol = j + dir[1]
 
@@ -89,6 +91,4 @@ class BFS {
         }
         emit(board.copy(state = Board.State.IDLE))
     }
-
-    private fun IntArray?.getOrDefault(index: Int, default: Int = -1): Int = this?.get(index) ?: default
 }

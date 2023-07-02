@@ -1,5 +1,6 @@
 package com.jutikorn.pathfinder.methods
 
+import com.jutikorn.pathfinder.Directions
 import com.jutikorn.pathfinder.model.Block
 import com.jutikorn.pathfinder.model.Board
 import kotlinx.coroutines.delay
@@ -7,7 +8,7 @@ import kotlinx.coroutines.flow.flow
 
 class DFS {
 
-    operator fun invoke(input: Board) = flow<Board> {
+    operator fun invoke(input: Board, directions: Directions) = flow<Board> {
         val visited: HashSet<String> = HashSet()
         val matrix = input.copy().matrix.map { it.toMutableList() }.toMutableList()
         var board = input
@@ -47,7 +48,7 @@ class DFS {
                 board = board,
             )
 
-            for (dir in DIRECTIONS) {
+            for (dir in directions.dirs) {
                 val newRow = i + dir[0]
                 val newCol = j + dir[1]
 

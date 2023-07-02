@@ -21,6 +21,8 @@ fun gcd(x: Int, y: Int): Int {
  * (Note that Math.random returns a value >= 0.0 and < 1.0.)
  */
 fun getRandomBoolean(probability: Double): Boolean {
-    val randomValue = Math.random() * 100 //0.0 to 99.9
+    val randomValue = Math.random() * 100
     return randomValue <= probability
 }
+
+internal fun IntArray?.getOrDefault(index: Int, default: Int = -1): Int = this?.get(index) ?: default

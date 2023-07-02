@@ -1,5 +1,6 @@
 package com.jutikorn.pathfinder.methods
 
+import com.jutikorn.pathfinder.Directions
 import com.jutikorn.pathfinder.model.Block
 import com.jutikorn.pathfinder.model.Board
 import kotlinx.coroutines.flow.FlowCollector
@@ -34,3 +35,9 @@ internal suspend fun FlowCollector<Board>.emitBlockState(
     emit(newPathState)
     return newPathState
 }
+
+internal val Directions.dirs
+    get() = when (this) {
+        Directions.FOUR -> DIRECTIONS
+        Directions.EIGHT -> DIRECTIONS_WITH_DIAGONAL
+    }

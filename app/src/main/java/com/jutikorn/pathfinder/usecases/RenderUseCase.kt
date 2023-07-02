@@ -1,5 +1,6 @@
 package com.jutikorn.pathfinder.usecases
 
+import com.jutikorn.pathfinder.Directions
 import com.jutikorn.pathfinder.Traversal
 import com.jutikorn.pathfinder.methods.AStarEuclidean
 import com.jutikorn.pathfinder.methods.AStarManhattan
@@ -18,15 +19,16 @@ class RenderUseCase(
 ) {
     operator fun invoke(
         traversal: Traversal,
+        directions: Directions,
         board: Board,
         withWeight: Boolean,
     ): Flow<Board> {
         return when (traversal) {
-            Traversal.BFS -> bfs.invoke(board)
-            Traversal.DFS -> dfs.invoke(board)
-            Traversal.DIJKSTRA -> dijkstra.invoke(board, withWeight)
-            Traversal.ASTAR_EUCLIDEAN -> aStarEuclidean.invoke(board, withWeight)
-            Traversal.ASTAR_MANHATTAN -> aStarManhattan.invoke(board, withWeight)
+            Traversal.BFS -> bfs.invoke(board, directions)
+            Traversal.DFS -> dfs.invoke(board, directions)
+            Traversal.DIJKSTRA -> dijkstra.invoke(board, withWeight, directions)
+            Traversal.ASTAR_EUCLIDEAN -> aStarEuclidean.invoke(board, withWeight, directions)
+            Traversal.ASTAR_MANHATTAN -> aStarManhattan.invoke(board, withWeight, directions)
         }
     }
 }

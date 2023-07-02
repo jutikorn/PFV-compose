@@ -9,17 +9,17 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +34,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import com.jutikorn.pathfinder.Directions
 import com.jutikorn.pathfinder.R
 import com.jutikorn.pathfinder.Traversal
 import com.jutikorn.pathfinder.ViewState
@@ -47,10 +46,13 @@ fun ControlPanel(
     onResetClick: () -> Unit = {},
     onCheckedChange: ((Boolean) -> Unit) = {},
     onItemSelected: (Traversal) -> Unit = {},
-    items: List<Traversal> = Traversal.values().toList(),
-    selectedItem: Traversal = Traversal.BFS,
+    traversals: List<Traversal> = Traversal.values().toList(),
+    selectedTraversals: Traversal = Traversal.BFS,
     state: Board.State = Board.State.IDLE,
     showWeight: Boolean = true,
+    directions: List<Directions> = Directions.values().toList(),
+    selectedDir: Directions = Directions.FOUR,
+    onOptionSelected: (Directions) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -76,27 +78,33 @@ fun ControlPanel(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Checkbox(
-                checked = showWeight,
-                onCheckedChange = onCheckedChange,
-                enabled = selectedItem != Traversal.DFS &&
-                    selectedItem != Traversal.BFS &&
-                    state == Board.State.IDLE,
+            Row {
+                Checkbox(
+                    checked = showWeight,
+                    onCheckedChange = onCheckedChange,
+                    enabled = selectedTraversals != Traversal.DFS &&
+                        selectedTraversals != Traversal.BFS &&
+                        state == Board.State.IDLE,
+                )
+                Text(text = "With Weight")
+            }
+
+            DirectionOptionsView(
+                selectedDir = selectedDir,
+                directions = directions,
+                onOptionSelected = onOptionSelected,
             )
-            Text(text = "With Weight")
 
             Spinner(
                 enabled = state == Board.State.IDLE,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .align(CenterVertically),
-                items = items,
-                selectedItem = selectedItem,
+                    .fillMaxWidth(),
+                items = traversals,
+                selectedItem = selectedTraversals,
                 onItemSelected = onItemSelected,
                 selectedItemFactory = { mod, t ->
 
@@ -152,25 +160,51 @@ fun Traversal.toDisplayName(): Int {
     }
 }
 
+@StringRes
+fun Directions.toDisplayName(): Int {
+    return when (this) {
+        Directions.FOUR -> R.string.direction_4
+        Directions.EIGHT -> R.string.direction_8
+    }
+}
+
+@Composable
+fun DirectionOptionsView(
+    directions: List<Directions> = Directions.values().toList(),
+    selectedDir: Directions = Directions.FOUR,
+    onOptionSelected: (Directions) -> Unit = {},
+) {
+    Column {
+        directions.forEach { dir ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = (dir == selectedDir),
+                        onClick = {
+                            onOptionSelected(dir)
+                        },
+                    )
+                    .padding(horizontal = 16.dp),
+            ) {
+                RadioButton(
+                    selected = (dir == selectedDir),
+                    onClick = { onOptionSelected(dir) },
+                )
+                Text(
+                    text = stringResource(id = dir.toDisplayName()),
+                    style = MaterialTheme.typography.body1.merge(),
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun Preview_ControlPanel() {
     ControlPanel()
-}
-
-@Composable
-fun Lifecycle.observeAsState(): State<Lifecycle.Event> {
-    val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
-    DisposableEffect(this) {
-        val observer = LifecycleEventObserver { _, event ->
-            state.value = event
-        }
-        this@observeAsState.addObserver(observer)
-        onDispose {
-            this@observeAsState.removeObserver(observer)
-        }
-    }
-    return state
 }
 
 @Composable
@@ -181,6 +215,7 @@ fun MapScreen(
     onItemSelected: (Traversal) -> Unit = {},
     onSizeUpdated: (width: Float, height: Float) -> Unit = { _, _ -> },
     onShowWeight: ((Boolean) -> Unit) = {},
+    onOptionSelected: (Directions) -> Unit = {},
 ) {
     // Create element height in pixel state
     var columnHeightPx by remember { mutableStateOf(0f) }
@@ -192,12 +227,15 @@ fun MapScreen(
         ControlPanel(
             onRenderClick = onClick,
             state = viewState.board.state,
-            selectedItem = viewState.selectedTraversal,
-            items = viewState.traversals,
+            selectedTraversals = viewState.selectedTraversal,
+            traversals = viewState.traversals,
             onItemSelected = onItemSelected,
             onResetClick = onStopClick,
             onCheckedChange = onShowWeight,
             showWeight = viewState.showWeight,
+            directions = viewState.directionsOptions,
+            selectedDir = viewState.selectedDirectionsOption,
+            onOptionSelected = onOptionSelected,
         )
         PathMap(
             board = viewState.board,

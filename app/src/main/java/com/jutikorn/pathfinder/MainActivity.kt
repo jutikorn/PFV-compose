@@ -46,6 +46,9 @@ class MainActivity : ComponentActivity() {
                         onShowWeight = {
                             viewModel.dispatch(ViewAction.OnWeightCheckBoxChanged(it))
                         },
+                        onOptionSelected = {
+                            viewModel.dispatch(ViewAction.SelectDirectionsOption(it))
+                        },
                     )
                 }
             }

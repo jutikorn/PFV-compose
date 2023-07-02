@@ -19,10 +19,16 @@ data class ViewState(
     val traversals: List<Traversal> = Traversal.values().toList(),
     val originalBoard: Board = Board(),
     val showWeight: Boolean = false,
+    val directionsOptions: List<Directions> = Directions.values().toList(),
+    val selectedDirectionsOption: Directions = Directions.FOUR,
 )
 
 enum class Traversal {
     DFS, BFS, DIJKSTRA, ASTAR_EUCLIDEAN, ASTAR_MANHATTAN
+}
+
+enum class Directions {
+    FOUR, EIGHT
 }
 
 sealed interface ViewAction {
@@ -37,6 +43,8 @@ sealed interface ViewAction {
     data class SelectTraversal(val method: Traversal) : ViewAction
 
     data class OnWeightCheckBoxChanged(val show: Boolean) : ViewAction
+
+    data class SelectDirectionsOption(val directions: Directions) : ViewAction
 }
 
 class MainViewModel(
@@ -69,6 +77,7 @@ class MainViewModel(
                 viewModelScope.launch {
                     renderUseCase.invoke(
                         state.value.selectedTraversal,
+                        state.value.selectedDirectionsOption,
                         state.value.board,
                         state.value.showWeight,
                     ).flowOn(Dispatchers.IO).collect {
@@ -85,8 +94,15 @@ class MainViewModel(
                 }
             }
             is ViewAction.OnWeightCheckBoxChanged -> {
+                viewModelScope.coroutineContext.cancelChildren()
                 setState {
                     copy(showWeight = action.show)
+                }
+            }
+            is ViewAction.SelectDirectionsOption -> {
+                viewModelScope.coroutineContext.cancelChildren()
+                setState {
+                    copy(selectedDirectionsOption = action.directions)
                 }
             }
         }

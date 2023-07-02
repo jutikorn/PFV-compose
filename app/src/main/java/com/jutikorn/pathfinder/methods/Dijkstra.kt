@@ -1,5 +1,7 @@
 package com.jutikorn.pathfinder.methods
 
+import com.jutikorn.pathfinder.Directions
+import com.jutikorn.pathfinder.ext.getOrDefault
 import com.jutikorn.pathfinder.model.Block
 import com.jutikorn.pathfinder.model.Board
 import kotlinx.coroutines.delay
@@ -11,6 +13,7 @@ class Dijkstra {
     operator fun invoke(
         input: Board,
         withWeight: Boolean,
+        directions: Directions,
     ) = flow {
         // minheap
         val queue: PriorityQueue<Item> = PriorityQueue { a, b ->
@@ -72,7 +75,7 @@ class Dijkstra {
                     state = Block.State.VISITED,
                 )
 
-                for (dir in DIRECTIONS) {
+                for (dir in directions.dirs) {
                     val newRow = i + dir[0]
                     val newCol = j + dir[1]
 
@@ -110,6 +113,4 @@ class Dijkstra {
         }
         emit(board.copy(state = Board.State.IDLE))
     }
-
-    private fun IntArray?.getOrDefault(index: Int, default: Int = -1): Int = this?.get(index) ?: default
 }
