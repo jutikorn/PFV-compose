@@ -1,6 +1,8 @@
 package com.jutikorn.pathfinder.di
 
 import com.jutikorn.pathfinder.MainViewModel
+import com.jutikorn.pathfinder.methods.AStarEuclidean
+import com.jutikorn.pathfinder.methods.AStarManhattan
 import com.jutikorn.pathfinder.methods.BFS
 import com.jutikorn.pathfinder.methods.DFS
 import com.jutikorn.pathfinder.methods.Dijkstra
@@ -26,6 +28,8 @@ object MainModules {
         singleOf(::BFS)
         singleOf(::Dijkstra)
         singleOf(::DFS)
+        singleOf(::AStarEuclidean)
+        singleOf(::AStarManhattan)
 
         singleOf(::GenerateMatrixUseCase)
         singleOf(::RenderUseCase)

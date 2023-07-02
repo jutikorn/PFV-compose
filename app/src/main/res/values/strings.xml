@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Pathfinder</string>
+    <string name="algorithm_dfs">Depth First Search</string>
+    <string name="algorithm_bfs">Depth Breadth Search</string>
+    <string name="algorithm_dijkstra">Dijkstra</string>
+    <string name="algorithm_a_star_euclidean">A* with Euclidean distance</string>
+    <string name="algorithm_a_star_manhattan">A* with Manhattan distance</string>
 </resources>

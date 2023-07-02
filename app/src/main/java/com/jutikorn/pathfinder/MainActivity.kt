@@ -43,6 +43,9 @@ class MainActivity : ComponentActivity() {
                         onStopClick = {
                             viewModel.dispatch(ViewAction.StopRenderClick)
                         },
+                        onShowWeight = {
+                            viewModel.dispatch(ViewAction.OnWeightCheckBoxChanged(it))
+                        },
                     )
                 }
             }

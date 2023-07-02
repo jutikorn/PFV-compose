@@ -1,20 +1,19 @@
 package com.jutikorn.pathfinder.methods
 
+import com.jutikorn.pathfinder.methods.helpers.calculateEuclideanDistance
 import com.jutikorn.pathfinder.model.Block
 import com.jutikorn.pathfinder.model.Board
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import java.util.PriorityQueue
 
-class Dijkstra {
+class AStarEuclidean {
 
-    operator fun invoke(
-        input: Board,
-        withWeight: Boolean,
-    ) = flow {
+    operator fun invoke(input: Board, withWeight: Boolean) = flow {
         // minheap
         val queue: PriorityQueue<Item> = PriorityQueue { a, b ->
-            a.indices[2] - b.indices[2]
+            // compare fCost
+            a.indices[4] - b.indices[4]
         }
 
         val visited: HashSet<String> = HashSet()
@@ -31,6 +30,8 @@ class Dijkstra {
                     0, // row
                     0, // col
                     0, // gCost
+                    0, // hCost
+                    0, // fCost
                 ),
                 pathWays = listOf(intArrayOf(0, 0)),
             ),
@@ -82,12 +83,24 @@ class Dijkstra {
                         } else {
                             gCost + 1
                         }
-                        val indices = intArrayOf(newRow, newCol, newGCost + board.matrix[newRow][newCol].distance)
-                        val newWeight = newGCost + board.matrix[newRow][newCol].distance
+                        val hCost = calculateEuclideanDistance(
+                            sourceRow = newRow,
+                            sourceCol = newCol,
+                            targetRow = rowDest,
+                            targetCol = colDest,
+                        )
+                        val fCost = newGCost + hCost
+                        val indices = intArrayOf(
+                            newRow, // row
+                            newCol, // col
+                            newGCost, // gCost
+                            hCost.toInt(),
+                            fCost.toInt(),
+                        )
                         queue.add(
                             Item(
                                 indices = indices,
-                                pathWays = item.pathWays + intArrayOf(newRow, newCol, newWeight),
+                                pathWays = item.pathWays + intArrayOf(newRow, newCol),
                             ),
                         )
                     }

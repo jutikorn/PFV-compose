@@ -8,7 +8,6 @@ import kotlin.random.Random
 class GenerateMatrixUseCase {
 
     operator fun invoke(screenWidth: Int, screenHeight: Int, obstacleProbability: Double = 15.00): Board {
-
         val rows = screenHeight / 26
         val cols = screenWidth / 26
 
@@ -16,7 +15,7 @@ class GenerateMatrixUseCase {
             (0 until cols).map { col ->
                 Block(
                     state = getSquareState(row, col, rows, cols, obstacleProbability),
-                    distance = Random.nextInt(1, 11)
+                    distance = Random.nextInt(1, 11),
                 )
             }
         }
@@ -29,11 +28,11 @@ class GenerateMatrixUseCase {
         col: Int,
         rows: Int,
         cols: Int,
-        obstacleProbability: Double = 10.00
+        obstacleProbability: Double = 10.00,
     ): Block.State =
         when {
             row == 0 && col == 0 -> Block.State.SOURCE
-            row != (rows-1)  && col != (cols-1)  && getRandomBoolean(obstacleProbability) -> {
+            row != (rows - 1) && col != (cols - 1) && getRandomBoolean(obstacleProbability) -> {
                 Block.State.OBSTRACLE
             }
             else -> {

@@ -1,6 +1,6 @@
 package com.jutikorn.pathfinder.ui
 
-import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -18,13 +19,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -32,12 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.jutikorn.pathfinder.R
 import com.jutikorn.pathfinder.Traversal
 import com.jutikorn.pathfinder.ViewState
 import com.jutikorn.pathfinder.model.Board
@@ -46,79 +45,110 @@ import com.jutikorn.pathfinder.model.Board
 fun ControlPanel(
     onRenderClick: () -> Unit = {},
     onResetClick: () -> Unit = {},
+    onCheckedChange: ((Boolean) -> Unit) = {},
     onItemSelected: (Traversal) -> Unit = {},
     items: List<Traversal> = Traversal.values().toList(),
     selectedItem: Traversal = Traversal.BFS,
     state: Board.State = Board.State.IDLE,
+    showWeight: Boolean = true,
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
     ) {
-        Button(
-            modifier = Modifier.padding(end = 4.dp),
-            enabled = state == Board.State.IDLE,
-            onClick = { onRenderClick.invoke() },
-        ) {
-            Text(text = "Render")
-        }
-        Button(
-            modifier = Modifier.padding(end = 4.dp),
-            enabled = state == Board.State.IDLE || state == Board.State.RUNNING,
-            onClick = { onResetClick.invoke() },
-        ) {
-            Text(text = "Reset")
-        }
-
-        Spinner(
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .align(CenterVertically),
-            items = items,
-            selectedItem = selectedItem,
-            onItemSelected = onItemSelected,
-            selectedItemFactory = { mod, t ->
+                .fillMaxWidth(),
+        ) {
+            Button(
+                modifier = Modifier.padding(end = 4.dp),
+                enabled = state == Board.State.IDLE,
+                onClick = { onRenderClick.invoke() },
+            ) {
+                Text(text = "Render")
+            }
+            Button(
+                modifier = Modifier.padding(end = 4.dp),
+                onClick = { onResetClick.invoke() },
+            ) {
+                Text(text = "Reset")
+            }
+        }
 
-                Box(
-                    modifier = mod
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(
-                            1.dp,
-                            Color.Black,
-                            shape = RoundedCornerShape(8.dp),
-                        ),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Checkbox(
+                checked = showWeight,
+                onCheckedChange = onCheckedChange,
+                enabled = selectedItem != Traversal.DFS &&
+                    selectedItem != Traversal.BFS &&
+                    state == Board.State.IDLE,
+            )
+            Text(text = "With Weight")
 
-                ) {
-                    Row(
-                        modifier = Modifier
+            Spinner(
+                enabled = state == Board.State.IDLE,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .align(CenterVertically),
+                items = items,
+                selectedItem = selectedItem,
+                onItemSelected = onItemSelected,
+                selectedItemFactory = { mod, t ->
+
+                    Box(
+                        modifier = mod
                             .fillMaxWidth()
-                            .align(Center),
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                1.dp,
+                                Color.Black,
+                                shape = RoundedCornerShape(8.dp),
+                            ),
                     ) {
-                        Text(
+                        Row(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f),
-                            text = t.name,
-                            style = MaterialTheme.typography.subtitle2,
-                        )
+                                .fillMaxWidth()
+                                .align(Center),
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .weight(1f),
+                                text = stringResource(id = t.toDisplayName()),
+                                style = MaterialTheme.typography.subtitle2,
+                            )
 
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            contentDescription = "",
-                            modifier = Modifier.align(CenterVertically),
-                            tint = Color.Black,
-                        )
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "",
+                                modifier = Modifier.align(CenterVertically),
+                                tint = Color.Black,
+                            )
+                        }
                     }
-                }
-            },
-            dropdownItemFactory = { t, _ ->
-                Text(text = t.name)
-            },
-        )
+                },
+                dropdownItemFactory = { t, _ ->
+                    Text(text = stringResource(id = t.toDisplayName()))
+                },
+            )
+        }
+    }
+}
+
+@StringRes
+fun Traversal.toDisplayName(): Int {
+    return when (this) {
+        Traversal.DFS -> R.string.algorithm_dfs
+        Traversal.BFS -> R.string.algorithm_bfs
+        Traversal.DIJKSTRA -> R.string.algorithm_dijkstra
+        Traversal.ASTAR_MANHATTAN -> R.string.algorithm_a_star_manhattan
+        Traversal.ASTAR_EUCLIDEAN -> R.string.algorithm_a_star_euclidean
     }
 }
 
@@ -150,18 +180,8 @@ fun MapScreen(
     onStopClick: () -> Unit,
     onItemSelected: (Traversal) -> Unit = {},
     onSizeUpdated: (width: Float, height: Float) -> Unit = { _, _ -> },
+    onShowWeight: ((Boolean) -> Unit) = {},
 ) {
-    // Get local density from composable
-    val localDensity = LocalDensity.current
-
-    val lifecycleEventState by LocalLifecycleOwner.current.lifecycle.observeAsState()
-
-    LaunchedEffect(lifecycleEventState) {
-        snapshotFlow { lifecycleEventState }.collect { event ->
-            Log.d("eddie", event.name)
-        }
-    }
-
     // Create element height in pixel state
     var columnHeightPx by remember { mutableStateOf(0f) }
 
@@ -176,10 +196,14 @@ fun MapScreen(
             items = viewState.traversals,
             onItemSelected = onItemSelected,
             onResetClick = onStopClick,
+            onCheckedChange = onShowWeight,
+            showWeight = viewState.showWeight,
         )
         PathMap(
             board = viewState.board,
-            showWeight = viewState.selectedTraversal == Traversal.DIJKSTRA,
+            showWeight = viewState.showWeight &&
+                viewState.selectedTraversal != Traversal.DFS &&
+                viewState.selectedTraversal != Traversal.BFS,
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(16.dp)

@@ -18,10 +18,11 @@ data class ViewState(
     val selectedTraversal: Traversal = Traversal.DIJKSTRA,
     val traversals: List<Traversal> = Traversal.values().toList(),
     val originalBoard: Board = Board(),
+    val showWeight: Boolean = false,
 )
 
 enum class Traversal {
-    DFS, BFS, DIJKSTRA
+    DFS, BFS, DIJKSTRA, ASTAR_EUCLIDEAN, ASTAR_MANHATTAN
 }
 
 sealed interface ViewAction {
@@ -34,6 +35,8 @@ sealed interface ViewAction {
     object StopRenderClick : ViewAction
 
     data class SelectTraversal(val method: Traversal) : ViewAction
+
+    data class OnWeightCheckBoxChanged(val show: Boolean) : ViewAction
 }
 
 class MainViewModel(
@@ -55,8 +58,9 @@ class MainViewModel(
                 }
             }
             is ViewAction.SelectTraversal -> {
+                viewModelScope.coroutineContext.cancelChildren()
                 setState {
-                    copy(selectedTraversal = action.method)
+                    copy(selectedTraversal = action.method, board = this.originalBoard)
                 }
             }
             ViewAction.RenderClick -> {
@@ -66,6 +70,7 @@ class MainViewModel(
                     renderUseCase.invoke(
                         state.value.selectedTraversal,
                         state.value.board,
+                        state.value.showWeight,
                     ).flowOn(Dispatchers.IO).collect {
                         setState {
                             copy(board = it)
@@ -77,6 +82,11 @@ class MainViewModel(
                 viewModelScope.coroutineContext.cancelChildren()
                 setState {
                     copy(board = this.originalBoard)
+                }
+            }
+            is ViewAction.OnWeightCheckBoxChanged -> {
+                setState {
+                    copy(showWeight = action.show)
                 }
             }
         }

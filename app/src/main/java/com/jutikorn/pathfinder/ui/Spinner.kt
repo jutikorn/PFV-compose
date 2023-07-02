@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 fun <T> Spinner(
     modifier: Modifier = Modifier,
     dropDownModifier: Modifier = Modifier,
+    enabled: Boolean = true,
     items: List<T>,
     selectedItem: T,
     onItemSelected: (T) -> Unit,
@@ -27,20 +28,22 @@ fun <T> Spinner(
     Box(modifier = modifier.wrapContentSize(Alignment.TopStart)) {
         selectedItemFactory(
             Modifier
-                .clickable { expanded = true },
-            selectedItem
+                .clickable {
+                    if (enabled) expanded = true
+                },
+            selectedItem,
         )
 
         androidx.compose.material.DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = dropDownModifier
+            modifier = dropDownModifier,
         ) {
             items.forEachIndexed { index, element ->
                 DropdownMenuItem(onClick = {
                     onItemSelected(items[index])
                     expanded = false
-                }) {
+                }, enabled = enabled) {
                     dropdownItemFactory(element, index)
                 }
             }
