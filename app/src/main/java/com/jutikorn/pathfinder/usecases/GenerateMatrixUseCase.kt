@@ -8,8 +8,8 @@ import kotlin.random.Random
 class GenerateMatrixUseCase {
 
     operator fun invoke(screenWidth: Int, screenHeight: Int, obstacleProbability: Double = 15.00): Board {
-        val rows = screenHeight / 26
-        val cols = screenWidth / 26
+        val rows = (screenHeight / BLOCK_SIZE_WITH_PADDING).toInt()
+        val cols = (screenWidth / BLOCK_SIZE_WITH_PADDING).toInt()
 
         val blocks = (0 until rows).map { row ->
             (0 until cols).map { col ->
@@ -20,7 +20,7 @@ class GenerateMatrixUseCase {
             }
         }
 
-        return Board(blockSize = 24, matrix = blocks, state = Board.State.IDLE)
+        return Board(blockSize = BLOCK_SIZE, matrix = blocks, state = Board.State.IDLE)
     }
 
     private fun getSquareState(
@@ -39,4 +39,9 @@ class GenerateMatrixUseCase {
                 Block.State.REGULAR
             }
         }
+
+    companion object {
+        const val BLOCK_SIZE_WITH_PADDING = 18.5
+        const val BLOCK_SIZE = 16
+    }
 }

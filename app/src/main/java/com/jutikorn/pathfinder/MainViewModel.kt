@@ -96,13 +96,13 @@ class MainViewModel(
             is ViewAction.OnWeightCheckBoxChanged -> {
                 viewModelScope.coroutineContext.cancelChildren()
                 setState {
-                    copy(showWeight = action.show)
+                    copy(showWeight = action.show, board = this.originalBoard)
                 }
             }
             is ViewAction.SelectDirectionsOption -> {
                 viewModelScope.coroutineContext.cancelChildren()
                 setState {
-                    copy(selectedDirectionsOption = action.directions)
+                    copy(selectedDirectionsOption = action.directions, board = this.originalBoard)
                 }
             }
         }

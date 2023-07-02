@@ -42,16 +42,16 @@ import com.jutikorn.pathfinder.model.Board
 
 @Composable
 fun ControlPanel(
-    onRenderClick: () -> Unit = {},
-    onResetClick: () -> Unit = {},
-    onCheckedChange: ((Boolean) -> Unit) = {},
-    onItemSelected: (Traversal) -> Unit = {},
     traversals: List<Traversal> = Traversal.values().toList(),
     selectedTraversals: Traversal = Traversal.BFS,
     state: Board.State = Board.State.IDLE,
     showWeight: Boolean = true,
     directions: List<Directions> = Directions.values().toList(),
     selectedDir: Directions = Directions.FOUR,
+    onRenderClick: () -> Unit = {},
+    onResetClick: () -> Unit = {},
+    onCheckedChange: ((Boolean) -> Unit) = {},
+    onItemSelected: (Traversal) -> Unit = {},
     onOptionSelected: (Directions) -> Unit = {},
 ) {
     Column(
@@ -94,6 +94,7 @@ fun ControlPanel(
             }
 
             DirectionOptionsView(
+                enabled = state == Board.State.IDLE,
                 selectedDir = selectedDir,
                 directions = directions,
                 onOptionSelected = onOptionSelected,
@@ -170,6 +171,7 @@ fun Directions.toDisplayName(): Int {
 
 @Composable
 fun DirectionOptionsView(
+    enabled: Boolean = true,
     directions: List<Directions> = Directions.values().toList(),
     selectedDir: Directions = Directions.FOUR,
     onOptionSelected: (Directions) -> Unit = {},
@@ -188,6 +190,7 @@ fun DirectionOptionsView(
                     .padding(horizontal = 16.dp),
             ) {
                 RadioButton(
+                    enabled = enabled,
                     selected = (dir == selectedDir),
                     onClick = { onOptionSelected(dir) },
                 )
